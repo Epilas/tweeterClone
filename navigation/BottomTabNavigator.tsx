@@ -1,13 +1,21 @@
-import { Ionicons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as React from 'react';
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import * as React from "react";
 
-import Colors from '../constants/Colors';
-import useColorScheme from '../hooks/useColorScheme';
-import TabOneScreen from '../screens/TabOneScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
-import { BottomTabParamList, TabOneParamList, TabTwoParamList } from '../types';
+import Colors from "../constants/Colors";
+import useColorScheme from "../hooks/useColorScheme";
+import HomeScreen from "../screens/HomeScreen";
+import TabTwoScreen from "../screens/TabTwoScreen";
+import {
+  BottomTabParamList,
+  HomeNavigatorParamList,
+  TabTwoParamList,
+} from "../types";
+import ProfilePicture from "../components/ProfilePicture";
+import { useEffect, useState } from "react";
+import { API, Auth, graphqlOperation } from "aws-amplify";
+import { getUser } from "../graphql/queries";
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -16,20 +24,46 @@ export default function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
-      tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
+      initialRouteName="Home"
+      tabBarOptions={{
+        activeTintColor: Colors[colorScheme].tint,
+        showLabel: false,
+      }}
+    >
       <BottomTab.Screen
-        name="TabOne"
-        component={TabOneNavigator}
+        name="Home"
+        component={HomeNavigator}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="md-home" color={color} />
+          ),
         }}
       />
       <BottomTab.Screen
-        name="TabTwo"
+        name="Search"
         component={TabTwoNavigator}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="ios-search" color={color} />
+          ),
+        }}
+      />
+      <BottomTab.Screen
+        name="Notification"
+        component={TabTwoNavigator}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="ios-notifications-outline" color={color} />
+          ),
+        }}
+      />
+      <BottomTab.Screen
+        name="Messages"
+        component={TabTwoNavigator}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="ios-mail" color={color} />
+          ),
         }}
       />
     </BottomTab.Navigator>
@@ -38,21 +72,72 @@ export default function BottomTabNavigator() {
 
 // You can explore the built-in icon families and icons on the web at:
 // https://icons.expo.fyi/
-function TabBarIcon(props: { name: React.ComponentProps<typeof Ionicons>['name']; color: string }) {
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof Ionicons>["name"];
+  color: string;
+}) {
   return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
 }
 
 // Each tab has its own navigation stack, you can read more about this pattern here:
 // https://reactnavigation.org/docs/tab-based-navigation#a-stack-navigator-for-each-tab
-const TabOneStack = createStackNavigator<TabOneParamList>();
+const TabOneStack = createStackNavigator<HomeNavigatorParamList>();
 
-function TabOneNavigator() {
+function HomeNavigator() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userInfo = await Auth.currentAuthenticatedUser({
+        bypassCache: true,
+      });
+      if (!userInfo) {
+        return;
+      }
+      try {
+        const userData = await API.graphql(
+          graphqlOperation(getUser, { id: userInfo.attributes.sub })
+        );
+        if (userData) {
+          setUser(userData.data.getUser);
+        }
+        console.log(user)
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
     <TabOneStack.Navigator>
       <TabOneStack.Screen
-        name="TabOneScreen"
-        component={TabOneScreen}
-        options={{ headerTitle: 'Tab One Title' }}
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          headerRightContainerStyle: {
+            marginRight: 15,
+          },
+          headerLeftContainerStyle: {
+            marginLeft: 15,
+          },
+          headerTitle: () => (
+            <Ionicons
+              name={"logo-twitter"}
+              size={30}
+              color={Colors.light.tint}
+            />
+          ),
+          headerTitleAlign: "center",
+          headerRight: () => (
+            <MaterialCommunityIcons
+              name={"star-four-points-outline"}
+              size={30}
+              color={Colors.light.tint}
+            />
+          ),
+          headerLeft: () => <ProfilePicture size={40} image={user?.image} />,
+        }}
       />
     </TabOneStack.Navigator>
   );
@@ -66,7 +151,7 @@ function TabTwoNavigator() {
       <TabTwoStack.Screen
         name="TabTwoScreen"
         component={TabTwoScreen}
-        options={{ headerTitle: 'Tab Two Title' }}
+        options={{ headerTitle: "Tab Two Title" }}
       />
     </TabTwoStack.Navigator>
   );

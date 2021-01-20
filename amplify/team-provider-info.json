@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-tweeterclone-dev-162039-authRole",
+      "UnauthRoleArn": "arn:aws:iam::535780221113:role/amplify-tweeterclone-dev-162039-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::535780221113:role/amplify-tweeterclone-dev-162039-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-tweeterclone-dev-162039-deployment",
+      "UnauthRoleName": "amplify-tweeterclone-dev-162039-unauthRole",
+      "StackName": "amplify-tweeterclone-dev-162039",
+      "StackId": "arn:aws:cloudformation:eu-central-1:535780221113:stack/amplify-tweeterclone-dev-162039/0fd29210-5b33-11eb-aa5a-0aeffe35c30a",
+      "AmplifyAppId": "d2b6ipzx8pqsfl"
+    },
+    "categories": {
+      "auth": {
+        "tweeterclone50fb35d5": {}
+      }
+    }
+  }
+}
