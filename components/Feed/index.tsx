@@ -32,7 +32,7 @@ const Feed = () => {
       <FlatList
         data={tweets}
         renderItem={({ item }) => <Tweet tweet={item} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item}
         refreshing={loading}
         onRefresh={fetchTweets}
       />
